@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo List App</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <div id="alert" style="color: red; display: none;"></div> <!-- Tambah untuk error message -->
+        
+        <!-- Form Tambah/Edit -->
+        <form id="todo-form">
+            <input type="hidden" id="edit-id">
+            <label for="title">Judul:</label>
+            <input type="text" id="title" required>
+            <label for="description">Deskripsi:</label>
+            <textarea id="description"></textarea>
+            <label for="status">Status:</label>
+            <select id="status">
+                <option value="undone">Undone</option>
+                <option value="done">Done</option>
+            </select>
+            <label for="photo">Upload Foto:</label>
+            <input type="file" id="photo" accept="image/*">
+            <button type="submit">Tambah Todo</button>
+        </form>
+        
+        <!-- List Todo -->
+        <ul id="todo-list"></ul>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
