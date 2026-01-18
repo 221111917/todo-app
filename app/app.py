@@ -3,17 +3,18 @@ import sqlite3
 from datetime import datetime
 import logging
 from flask import Flask, request, jsonify, render_template, send_from_directory, abort
-from werkzeug.utils import secure_filename  # Tambah untuk logging sederhana (demo monitoring)
+from werkzeug.utils import secure_filename  # Security utility for file upload handling
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-# Setup logging
+# Setup logging for monitoring and debugging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Konfigurasi
-DB_PATH = '/data/todos.db'
-UPLOAD_FOLDER = '/uploads'
+# Application Configuration
+DB_PATH = '/data/todos.db'  # SQLite database path (persistent volume)
+UPLOAD_FOLDER = '/uploads'  # Photo uploads directory (persistent volume)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Allowed file extensions for photo uploads (security measure)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 os.makedirs('/data', exist_ok=True)
@@ -150,4 +151,5 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
+
     app.run(host='0.0.0.0', port=5000)
