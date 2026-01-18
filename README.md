@@ -76,4 +76,17 @@ Invoke-WebRequest -OutFile 'c:\minikube\minikube.exe' -Uri 'https://github.com/k
 - Monitoring dasar (Prometheus siap pakai)
 - Persistensi data (volume mount untuk /data dan /uploads)
 
+
+## Arsitektur
+
+### Teknologi yang digunakan:
+- **Backend**: Python Flask 2.3+
+- **Database**: SQLite with persistent volumes
+- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **Containerization**: Docker
+- **Orchestration**: Kubernetes (Minikube for development)
+- **Monitoring**: Prometheus + Application logging
+- **CI/CD**: GitHub Actions
+
+
 Selamat mencoba! Jika ada issue, buka issue di repo atau hubungi kelompok.
