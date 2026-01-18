@@ -43,98 +43,114 @@ init_db()
 
 @app.route('/api/todos', methods=['GET'])
 def get_todos():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT * FROM todos ORDER BY created_at DESC")
-    todos = c.fetchall()
-    conn.close()
-    logging.info("Fetched todos")
-    return jsonify([{
-        'id': row[0],
-        'title': row[1],
-        'description': row[2],
-        'status': row[3],
-        'photo': row[4],
-        'created_at': row[5]
-    } for row in todos])
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT * FROM todos ORDER BY created_at DESC")
+        todos = c.fetchall()
+        conn.close()
+        logging.info("Fetched todos")
+        return jsonify([{
+            'id': row[0],
+            'title': row[1],
+            'description': row[2],
+            'status': row[3],
+            'photo': row[4],
+            'created_at': row[5]
+        } for row in todos])
+    except Exception as e:
+        logging.error(f"Error fetching todos: {str(e)}")
+        return jsonify({'error': 'Failed to fetch todos'}), 500
 
 @app.route('/api/todos', methods=['POST'])
 def add_todo():
-    data = request.form
-    title = data.get('title')
-    description = data.get('description')
-    status = data.get('status', 'undone')
-    photo = None
-    if 'photo' in request.files:
-        file = request.files['photo']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            photo = filename
-            logging.info(f"Uploaded photo: {filename}")
-        else:
-            logging.warning("Invalid file upload attempt")
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("INSERT INTO todos (title, description, status, photo, created_at) VALUES (?, ?, ?, ?, ?)",
-              (title, description, status, photo, created_at))
-    conn.commit()
-    new_id = c.lastrowid
-    conn.close()
-    logging.info(f"Added todo ID: {new_id}")
-    return jsonify({'id': new_id, 'message': 'Todo added'}), 201
+    try:
+        data = request.form
+        title = data.get('title')
+        description = data.get('description')
+        status = data.get('status', 'undone')
+        photo = None
+        if 'photo' in request.files:
+            file = request.files['photo']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                photo = filename
+                logging.info(f"Uploaded photo: {filename}")
+            else:
+                logging.warning("Invalid file upload attempt")
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("INSERT INTO todos (title, description, status, photo, created_at) VALUES (?, ?, ?, ?, ?)",
+                  (title, description, status, photo, created_at))
+        conn.commit()
+        new_id = c.lastrowid
+        conn.close()
+        logging.info(f"Added todo ID: {new_id}")
+        return jsonify({'id': new_id, 'message': 'Todo added'}), 201
+    except Exception as e:
+        logging.error(f"Error adding todo: {str(e)}")
+        return jsonify({'error': 'Failed to add todo'}), 500
 
 @app.route('/api/todos/<int:todo_id>', methods=['PUT'])
 def edit_todo(todo_id):
-    data = request.form
-    title = data.get('title')
-    description = data.get('description')
-    status = data.get('status')
-    photo = None
-    if 'photo' in request.files:
-        file = request.files['photo']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            photo = filename
-            logging.info(f"Updated photo for ID {todo_id}: {filename}")
-    
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    updates = []
-    params = []
-    if title:
-        updates.append("title = ?")
-        params.append(title)
-    if description:
-        updates.append("description = ?")
-        params.append(description)
-    if status:
-        updates.append("status = ?")
-        params.append(status)
-    if photo:
-        updates.append("photo = ?")
-        params.append(photo)
-    if updates:
-        params.append(todo_id)
-        c.execute(f"UPDATE todos SET {', '.join(updates)} WHERE id = ?", params)
-        conn.commit()
-        logging.info(f"Updated todo ID: {todo_id}")
-    conn.close()
-    return jsonify({'message': 'Todo updated'})
+    try:
+        data = request.form
+        title = data.get('title')
+        description = data.get('description')
+        status = data.get('status')
+        photo = None
+        if 'photo' in request.files:
+            file = request.files['photo']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                photo = filename
+                logging.info(f"Updated photo for ID {todo_id}: {filename}")
+        
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        updates = []
+        params = []
+        if title:
+            updates.append("title = ?")
+            params.append(title)
+        if description:
+            updates.append("description = ?")
+            params.append(description)
+        if status:
+            updates.append("status = ?")
+            params.append(status)
+        if photo:
+            updates.append("photo = ?")
+            params.append(photo)
+        if updates:
+            params.append(todo_id)
+            c.execute(f"UPDATE todos SET {', '.join(updates)} WHERE id = ?", params)
+            conn.commit()
+            logging.info(f"Updated todo ID: {todo_id}")
+        conn.close()
+        return jsonify({'message': 'Todo updated'})
+    except Exception as e:
+        logging.error(f"Error updating todo {todo_id}: {str(e)}")
+        return jsonify({'error': 'Failed to update todo'}), 500
 
 @app.route('/api/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("DELETE FROM todos WHERE id = ?", (todo_id,))
-    conn.commit()
-    conn.close()
-    logging.info(f"Deleted todo ID: {todo_id}")
-    return jsonify({'message': 'Todo deleted'})
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("DELETE FROM todos WHERE id = ?", (todo_id,))
+        conn.commit()
+        conn.close()
+        logging.info(f"Deleted todo ID: {todo_id}")
+        return jsonify({'message': 'Todo deleted'})
+    except Exception as e:
+        logging.error(f"Error deleting todo {todo_id}: {str(e)}")
+        return jsonify({'error': 'Failed to delete todo'}), 500
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -151,5 +167,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-
     app.run(host='0.0.0.0', port=5000)
