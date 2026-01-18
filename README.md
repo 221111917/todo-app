@@ -4,7 +4,7 @@ Aplikasi Todo List sederhana berbasis web dengan dukungan Kubernetes (Minikube) 
 
 ## Anggota Kelompok
 - **Nicholas Tio** (NIM: 221111917)  
-- **Constantine** (NIM: 221112405)
+- **Constantin anggriano** (NIM: 221112405)
 
 ## Deskripsi Singkat
 Todo App adalah aplikasi manajemen tugas dengan fitur:
